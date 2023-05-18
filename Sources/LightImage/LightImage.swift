@@ -6,7 +6,7 @@ public extension UIImageView {
         UIImageLoader.shared.load(from: url, in: self)
     }
     
-    func cancel() {
+    func cancelLoad() {
         UIImageLoader.shared.cancel(for: self)
     }
 }
@@ -23,7 +23,9 @@ internal class UIImageLoader {
     
     func load(from url:URL, in imageView:UIImageView) {
         if let image = imagesCache[url] {
-            imageView.image = image
+            DispatchQueue.main.async {
+                imageView.image = image
+            }
             return
         }
         
@@ -32,7 +34,9 @@ internal class UIImageLoader {
             guard let data = data else {return}
             guard let image = UIImage(data: data) else {return}
             self.imagesCache[url] = image
-            imageView.image = image
+            DispatchQueue.main.async {
+                imageView.image = image
+            }
         }
         runningTasks[id] = task
         imageviewMap[imageView] = id
