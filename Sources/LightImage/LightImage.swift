@@ -1,13 +1,30 @@
 import UIKit
 
+public extension UITableViewCell {
+    func loadImage(from url:URL, in imageView:UIImageView, placeholder: UIImage? = nil) {
+        imageView.image = placeholder
+        UIImageLoader.shared.load(from: url, in: imageView, reusing: self)
+    }
+}
+
 public extension UIImageView {
     func loadImage(from url:URL, placeholder: UIImage? = nil) {
         self.image = placeholder
         UIImageLoader.shared.load(from: url, in: self)
     }
     
-    func cancelLoad() {
-        UIImageLoader.shared.cancel(for: self)
+    func cancel() {
+        UIImageLoader.shared.cancel(in: AnyHashable(self))
+    }
+}
+
+public extension UITableViewDelegate {
+    func tableView(
+        _ tableView: UITableView,
+        didEndDisplaying cell: UITableViewCell,
+        forRowAt indexPath: IndexPath
+    ) {
+        UIImageLoader.shared.cancel(in: AnyHashable(cell))
     }
 }
 
@@ -15,13 +32,13 @@ internal class UIImageLoader {
     static let shared = UIImageLoader()
     private var imagesCache = [URL:UIImage]()
     private var runningTasks = [UUID:URLSessionDataTask]()
-    private var imageviewMap = [UIImageView:UUID]()
+    private var imageviewMap = [AnyHashable:UUID]()
     
     private init() {
         
     }
     
-    func load(from url:URL, in imageView:UIImageView) {
+    func load(from url:URL, in imageView:UIImageView, reusing cell:UITableViewCell? = nil) {
         if let image = imagesCache[url] {
             DispatchQueue.main.async {
                 imageView.image = image
@@ -39,17 +56,23 @@ internal class UIImageLoader {
             }
         }
         runningTasks[id] = task
-        imageviewMap[imageView] = id
+        
+        if let cell = cell {
+            imageviewMap[AnyHashable(cell)] = id
+        } else {
+            imageviewMap[AnyHashable(imageView)] = id
+        }
+        
         task.resume()
         
     }
     
-    func cancel(for imageView:UIImageView) {
-        guard let id = imageviewMap[imageView] else {return}
+    func cancel(in type:AnyHashable) {
+        guard let id = imageviewMap[AnyHashable(type)] else {return}
         guard let task = runningTasks[id] else {return}
         task.cancel()
         runningTasks.removeValue(forKey: id)
-        imageviewMap.removeValue(forKey: imageView)
+        imageviewMap.removeValue(forKey: AnyHashable(type))
     }
 
 }
