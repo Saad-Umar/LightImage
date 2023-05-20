@@ -76,23 +76,24 @@ internal class UIImageLoader {
                     //remove and cancel
                     let workItem = DispatchWorkItem() {
                         //move image to disk cache
-               
+                        
                         let fileManager = FileManager.default
                         let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
                         let filePath = documentsURL?.appendingPathComponent("\(url.absoluteString.toHexEncodedString()).png")
                         
                         guard let filePath = filePath else {return}
                         
-                        if let image = self.imagesCache[url], let imageData = image?.pngData() {
-                            do {
-                                try imageData.write(to: filePath, options: .atomic)
-                                print("Setting Image At Path:\(filePath)")
-                            } catch {
-                                print("Couldnt save image in file system:\(error)")
+                        let serialQueue = DispatchQueue(label: "serialQueue")
+                        serialQueue.async {
+                            if let image = self.imagesCache[url], let imageData = image?.pngData() {
+                                do {
+                                    try imageData.write(to: filePath, options: .atomic)
+                                    print("Setting Image At Path:\(filePath)")
+                                } catch {
+                                    print("Couldnt save image in file system:\(error)")
+                                }
                             }
-                        }
-                       
-                        if FileManager.default.fileExists(atPath: filePath.absoluteString) {
+                            
                             self.imagesCache.updateValue(nil, forKey: url) //free up ram
                             print("IMAGE FILE AT:\(url)")
                             print("RAM FREED UP!")
@@ -107,8 +108,8 @@ internal class UIImageLoader {
                 } else {
                     self.cacheDispatchWorkItems[url]?.cancel()
                 }
-               
-                                
+                
+                
             }))
         } else {
             imageviewMap[AnyHashable(imageView)] = id
@@ -133,7 +134,7 @@ internal class UIImageLoader {
         print("Getting Image At Path: \(filePath)")
         return filePath?.absoluteString
     }
-
+    
 }
 
 fileprivate class IndexPathAwareTableViewCell: NSObject {
