@@ -68,7 +68,7 @@ internal class UIImageLoader {
             }
             
             indexPathAwareCells.append(cell)
-            observations.append(cell.observe(\.isCurrentlyVisible, changeHandler: { [weak self] cell, change in
+            observations.append(cell.observe(\.isCurrentlyVisible, options: .new, changeHandler: { [weak self] cell, change in
                 guard let self = self else {return}
                 guard let isCurrentlyVisible = change.newValue else {return}
                 
