@@ -88,7 +88,7 @@ internal class UIImageLoader {
                                 try imageData.write(to: filePath, options: .atomic)
                                 print("Setting Image At Path:\(filePath)")
                             } catch {
-                                
+                                print("Couldnt save image in file system:\(error)")
                             }
                         }
                        
