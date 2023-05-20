@@ -23,7 +23,7 @@ internal class UIImageLoader {
     private var imagesCache = [URL:UIImage?]()
     private var runningTasks = [UUID:URLSessionDataTask]()
     private var imageviewMap = [AnyHashable:UUID]()
-    private var indexPathAwareCells = [IndexPathAwareTableViewCell]()
+    @objc private var indexPathAwareCells = [IndexPathAwareTableViewCell]()
     private var observations = [NSKeyValueObservation]()
     private var cacheDispatchWorkItems = [URL: DispatchWorkItem]()
     
@@ -70,10 +70,6 @@ internal class UIImageLoader {
             indexPathAwareCells.append(cell)
             observations.append(cell.observe(\.isCurrentlyVisible, changeHandler: { [weak self] cell, change in
                 guard let self = self else {return}
-                print("IMAGE FILE AT:\(url)")
-                print("RAM FREED UP!")
-                print(String(describing: url))
-                print(url)
                 guard let isCurrentlyVisible = change.newValue else {return}
                 
                 if !isCurrentlyVisible {
@@ -91,7 +87,10 @@ internal class UIImageLoader {
                        
                         if FileManager.default.fileExists(atPath: String(describing: url)) {
                             self.imagesCache.updateValue(nil, forKey: url) //free up ram
-                           
+                            print("IMAGE FILE AT:\(url)")
+                            print("RAM FREED UP!")
+                            print(String(describing: url))
+                            print(url)
                         }
                         
                     }
