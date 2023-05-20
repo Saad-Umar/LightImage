@@ -70,6 +70,10 @@ internal class UIImageLoader {
             indexPathAwareCells.append(cell)
             observations.append(cell.observe(\.isCurrentlyVisible, changeHandler: { [weak self] cell, change in
                 guard let self = self else {return}
+                print("IMAGE FILE AT:\(url)")
+                print("RAM FREED UP!")
+                print(String(describing: url))
+                print(url)
                 guard let isCurrentlyVisible = change.newValue else {return}
                 
                 if !isCurrentlyVisible {
@@ -84,10 +88,7 @@ internal class UIImageLoader {
                                 
                             }
                         }
-                        print("IMAGE FILE AT:\(url)")
-                        print("RAM FREED UP!")
-                        print(String(describing: url))
-                        print(url)
+                       
                         if FileManager.default.fileExists(atPath: String(describing: url)) {
                             self.imagesCache.updateValue(nil, forKey: url) //free up ram
                            
