@@ -79,7 +79,7 @@ internal class UIImageLoader {
                
                         let fileManager = FileManager.default
                         let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
-                        let filePath = documentsURL?.appendingPathComponent("\(String(describing: url)).png")
+                        let filePath = documentsURL?.appendingPathComponent("\(url.absoluteString.toHexEncodedString()).png")
                         
                         guard let filePath = filePath else {return}
                         
@@ -129,7 +129,7 @@ internal class UIImageLoader {
     fileprivate func cachedImageFilePath(with url: URL) -> String? {
         let fileManager = FileManager.default
         let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
-        let filePath = documentsURL?.appendingPathComponent("\(String(describing: url)).png")
+        let filePath = documentsURL?.appendingPathComponent("\(url.absoluteString.toHexEncodedString()).png")
         print("Getting Image At Path: \(filePath)")
         return filePath?.absoluteString
     }
@@ -145,5 +145,11 @@ fileprivate class IndexPathAwareTableViewCell: NSObject {
         self.indexPath = indexPath
         self.cell = cell
         self.isCurrentlyVisible = true
+    }
+}
+
+extension String {
+    func toHexEncodedString(uppercase: Bool = true, prefix: String = "", separator: String = "") -> String {
+        return unicodeScalars.map { prefix + .init($0.value, radix: 16, uppercase: uppercase) } .joined(separator: separator)
     }
 }
