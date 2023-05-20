@@ -92,7 +92,7 @@ internal class UIImageLoader {
                             }
                         }
                        
-                        if FileManager.default.fileExists(atPath: String(describing: url)) {
+                        if FileManager.default.fileExists(atPath: filePath.absoluteString) {
                             self.imagesCache.updateValue(nil, forKey: url) //free up ram
                             print("IMAGE FILE AT:\(url)")
                             print("RAM FREED UP!")
