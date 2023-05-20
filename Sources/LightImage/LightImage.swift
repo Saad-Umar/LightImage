@@ -38,7 +38,7 @@ internal class UIImageLoader {
                 imageView.image = image
             }
             return
-        } else if let image = UIImage(contentsOfFile: String(describing: url)) { //If Image exists on disk
+        } else if let image = UIImage(contentsOfFile: cachedImageFilePath(with: url) ?? "") { //If Image exists on disk
             imagesCache[url] = image
             DispatchQueue.main.async {
                 imageView.image = image
@@ -77,9 +77,16 @@ internal class UIImageLoader {
                     let workItem = DispatchWorkItem() {
                         //move image to disk cache
                
+                        let fileManager = FileManager.default
+                        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+                        let filePath = documentsURL?.appendingPathComponent("\(String(describing: url)).png")
+                        
+                        guard let filePath = filePath else {return}
+                        
                         if let image = self.imagesCache[url], let imageData = image?.pngData() {
                             do {
-                                try imageData.write(to: url, options: .atomic)
+                                try imageData.write(to: filePath, options: .atomic)
+                                print("Setting Image At Path:\(filePath)")
                             } catch {
                                 
                             }
@@ -117,6 +124,14 @@ internal class UIImageLoader {
         task.cancel()
         runningTasks.removeValue(forKey: id)
         imageviewMap.removeValue(forKey: AnyHashable(type))
+    }
+    
+    fileprivate func cachedImageFilePath(with url: URL) -> String? {
+        let fileManager = FileManager.default
+        let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+        let filePath = documentsURL?.appendingPathComponent("\(String(describing: url)).png")
+        print("Getting Image At Path: \(filePath)")
+        return filePath?.absoluteString
     }
 
 }
